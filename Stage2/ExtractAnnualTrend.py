@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import sys
 import CassandraHelper
 import xml.etree.ElementTree as xml
 import time
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     for data_source in data_source_directories:
         data_source_path = data_source + posts_file_name_suffix
         annual_tags_trend = extract_info_from_source(data_source_path)
-        domain_name = data_source.split("\\")[-1].split(".")[0]
+        domain_name = data_source.split("//")[-1].split(".")[0]
         for year in annual_tags_trend:
             CassandraHelper.insert_values_in_annual_trends_column_family(domain_name, year, annual_tags_trend[year])
         print("Loaded " + domain_name)

@@ -1,5 +1,6 @@
 from datetime import datetime
 import os
+import sys
 import CassandraHelper
 import xml.etree.ElementTree as xml
 import time
@@ -98,8 +99,9 @@ if __name__ == "__main__":
     print("Starting processing for " + str(len(data_source_directories)) + " sources")
     for data_source in data_source_directories:
         data_source_path = data_source + posts_file_name_suffix
+        domain_name = data_source.split("//")[-1].split(".")[0]
+        print("Loading " + domain_name)
         total_questions, unanswered_questions, trending_tags, average_answers_count, most_viewed_posts, most_scored_posts, average_time_to_answer = extract_info_from_source(data_source_path)
-        domain_name = data_source.split("\\")[-1].split(".")[0]
         CassandraHelper.insert_values_in_posts_column_family(domain_name, total_questions, unanswered_questions, trending_tags, average_answers_count, most_viewed_posts, most_scored_posts, average_time_to_answer)
         print("Loaded " + domain_name)
 

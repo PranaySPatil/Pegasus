@@ -58,3 +58,11 @@ def get_annual_trend_tag_by_year(domain, year):
     """, (domain, year))
     
     return result
+
+def get_all_domains():
+    result = session.execute("""
+        SELECT domain
+        FROM AnnualTrends
+    """)
+    
+    return result
