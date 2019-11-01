@@ -8,14 +8,6 @@ import random
 class Stage1:
     def extractSourceZipFiles(self, source_meta_path, zip_files_path_prefix, data_destination_directory):
         args = sys.argv
-        if len(args) > 1 and args[1] == 'ssd':
-            source_meta_path = "D://BigData//Stage1_data//Sites.xml"
-            zip_files_path_prefix = "D://BigData//Stage1_data//"
-            data_destination_directory = "D://BigData//Stage2_data//"
-        else:
-            source_meta_path = "C://Users//PranayDev//Documents//BigData//ETL//Pegasus//Stage1//Stage1_data//Sites.xml"
-            zip_files_path_prefix = "C://Users//PranayDev//Documents//BigData//ETL//Pegasus//Stage1//Stage1_data//"
-            data_destination_directory = "C://Users//PranayDev//Documents//BigData//ETL//Pegasus//Stage2//Stage2_data//"
         
         file_extension = ".7z"
         source_folder_path = ""
@@ -31,9 +23,6 @@ class Stage1:
                     domains.append(elem.attrib['TinyName'])
                     zip_file_paths.append(urlparse(elem.attrib['Url']).hostname)
 
-        domains.remove("stackoverflow")
-        zip_file_paths.remove("stackoverflow.com")
-        zip_file_paths = zip_file_paths[23:]
         if not len(args) > 1 or not args[1] == 'ssd':
             # too big for my machine, only trying random 10 sources
             zip_file_paths = random.sample(zip_file_paths, 10)

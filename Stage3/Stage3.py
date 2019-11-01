@@ -1,7 +1,6 @@
 from datetime import datetime
 import os
 import sys
-sys.path.append(os.path.abspath('../Utilities'))
 import CassandraHelper
 import xml.etree.ElementTree as xml
 import time
@@ -149,9 +148,9 @@ class Stage3:
 if __name__ == "__main__":
     args = sys.argv
     if len(args) > 1 and args[1] == 'ssd':
-        data_source = "D://BigData//Stage2_data//"
+        data_source = "D://BigData//Stage3_data//"
     else:
-        data_source = "C://Users//PranayDev//Documents//BigData//ETL//Pegasus//Stage2//Stage2_data//"
+        data_source = "C://Users//PranayDev//Documents//BigData//ETL//Pegasus//Stage3//Stage3_data//"
     
     stage3 = Stage3()
 

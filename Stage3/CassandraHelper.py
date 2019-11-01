@@ -50,23 +50,6 @@ def insert_values_in_annual_trends_column_family(domain, year, tags):
         (%s, %s, %s);
     """, (domain, year, tags))
 
-def get_annual_trend_tag_by_year(domain, year):
-    result = session.execute("""
-        SELECT Tags
-        FROM AnnualTrends
-        WHERE Domain = %s AND Year = %s;
-    """, (domain, year))
-    
-    return result
-
-def get_all_domains():
-    result = session.execute("""
-        SELECT domain
-        FROM AnnualTrends
-    """)
-    
-    return result
-
 def cleanup_domain_keys():
     result = session.execute("""
         SELECT *
