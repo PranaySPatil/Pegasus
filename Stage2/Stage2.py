@@ -8,10 +8,12 @@ import random
 
 class Stage2:
     def filterUnwantedSources(self, data_source_directory, data_destination_directory, required_file_names):
+        # get domain directories from source
         walk = os.walk(data_source_directory)
         data_source_directories = [x[0] for x in walk]
         data_source_directories = data_source_directories[1:]
 
+        #for each domain directory copy required tables to destination directory
         for directory in data_source_directories:
             destination_folder = directory.split("//")[-1]
             destination = data_destination_directory + destination_folder
@@ -25,6 +27,7 @@ class Stage2:
 if __name__ == "__main__":
     stage2 = Stage2()
     args = sys.argv
+    # if ssd argument is passed, use it as a source and destination for data
     if len(args) > 1 and args[1] == 'ssd':
         stage2.filterUnwantedSources("D://BigData//Stage2_data//", "D://BigData//Stage3_data//", ["Posts.xml"])
     else:

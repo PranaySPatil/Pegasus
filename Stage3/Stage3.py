@@ -22,37 +22,43 @@ class Stage3:
         context = iter(context)
         event, root = context.next()
 
+        # iterate over each xml element
         for event, elem in context:
             if event == "end":
                 if elem is not None:
                     if elem.attrib.has_key('PostTypeId') and elem.attrib['PostTypeId'] == '1':
                         total_questions += 1
+                        # if a question doesn't have AcceptedAnswerId, increment unanswered count 
                         if not elem.attrib.has_key('AcceptedAnswerId'):
                             unanswered_questions += 1
                         else:
+                            # if it is answered populate answerid -> questionCreationDate map
                             all_accepted_answers_ids[elem.attrib['AcceptedAnswerId']] = elem.attrib['CreationDate']
-                        if elem.attrib.has_key('Tags'):
-                            elem_tags = elem.attrib['Tags'][1:-1].split('><')
-                            for tag in elem_tags:
-                                if all_tags.has_key(tag):
-                                    all_tags[tag] += 1
-                                else:
-                                    all_tags[tag] = 1
                         if elem.attrib.has_key('AnswerCount'):
                             questions_with_answers_count += 1
                             answers_count += int(elem.attrib['AnswerCount'])
+                    # create maps for viewCount, score and tags
                     if elem.attrib.has_key('Id') and elem.attrib.has_key('ViewCount'):
                         most_viewed_posts[elem.attrib['Id']] = int(elem.attrib['ViewCount'])
                     if elem.attrib.has_key('Id') and elem.attrib.has_key('Score'):
                         most_scored_posts[elem.attrib['Id']] = int(elem.attrib['Score'])
+                    if elem.attrib.has_key('Tags'):
+                        elem_tags = elem.attrib['Tags'][1:-1].split('><')
+                        for tag in elem_tags:
+                            if all_tags.has_key(tag):
+                                all_tags[tag] += 1
+                            else:
+                                all_tags[tag] = 1
                 root.clear()
 
         context = xml.iterparse(source_path, events=("start", "end"))
         context = iter(context)
         event, root = context.next()
 
+        # second iteration to calculate average time to answer a question
         for event, elem in context:
             if event == "end":
+                # if the element is an answer, calculate difference answer creation date - question creation creation date
                 if elem is not None and elem.attrib.has_key('Id') and elem.attrib['Id'] in all_accepted_answers_ids.keys():
                     question_date_time = datetime.strptime(all_accepted_answers_ids[elem.attrib['Id']], '%Y-%m-%dT%H:%M:%S.%f')
                     answer_date_time = datetime.strptime(elem.attrib['CreationDate'], '%Y-%m-%dT%H:%M:%S.%f')
@@ -61,6 +67,7 @@ class Stage3:
                     del all_accepted_answers_ids[elem.attrib['Id']]
                 root.clear()
 
+        # sort the maps to get ids with maximum votes
         sorted_tags = sorted(all_tags.items() ,  key=lambda x: x[1] )
         sorted_tags.reverse()
         trending_tags = [i[0] for i in sorted_tags][0:10]
@@ -74,6 +81,7 @@ class Stage3:
         most_viewed_posts = [i[0] for i in most_viewed_posts][0:10]
         most_viewed_posts = ",".join(most_viewed_posts)
         average_answers_count = int(answers_count/questions_with_answers_count)
+        # caclulate average time to answer
         average_time_to_answer = int(sum(all_accepted_answers_duration)/len(all_accepted_answers_duration))
 
         del sorted_tags
@@ -89,6 +97,7 @@ class Stage3:
         context = iter(context)
         event, root = context.next()
 
+        # for each element in xml, populate annual_tags_trend[{year}][{tag}]
         for event, elem in context:
             if event == "end":
                 if elem is not None and elem.attrib.has_key('Tags') and elem.attrib.has_key('CreationDate'):
@@ -110,12 +119,14 @@ class Stage3:
     def load_aggregate_posts_data_from_source(self, data_source):
         start_time = time.time()
 
+        # get all domain directories from source
         posts_file_name_suffix = "\\Posts.xml"
         walk = os.walk(data_source)
         data_source_directories = [x[0] for x in walk]
         data_source_directories = data_source_directories[1:]
 
         print("Starting processing for " + str(len(data_source_directories)) + " sources")
+        # for each domain, extract posts info and dump into cassandra
         for data_source in data_source_directories:
             data_source_path = data_source + posts_file_name_suffix
             domain_name = data_source.split("//")[-1].split(".")[0]
@@ -129,12 +140,14 @@ class Stage3:
     def load_annual_topics_trends_from_source(self, data_source):
         start_time = time.time()
 
+        # get all domain directories from source
         posts_file_name_suffix = "\\Posts.xml"
         walk = os.walk(data_source)
         data_source_directories = [x[0] for x in walk]
         data_source_directories = data_source_directories[1:]
 
         print("Starting processing for " + str(len(data_source_directories)) + " sources")
+        # for each domain, extract top trends and dump into cassandra
         for data_source in data_source_directories:
             data_source_path = data_source + posts_file_name_suffix
             annual_tags_trend = self.extract_annual_tag_trend_from_source(data_source_path)
@@ -147,6 +160,7 @@ class Stage3:
 
 if __name__ == "__main__":
     args = sys.argv
+    # if ssd argument is passed, use it as a source and destination for data
     if len(args) > 1 and args[1] == 'ssd':
         data_source = "D://BigData//Stage3_data//"
     else:
